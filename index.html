@@ -44,6 +44,7 @@ img{max-width:100%}
   --ok:#6cc292; --ok-soft:#1d2e25; --bad:#ee8b78; --bad-soft:#3a2420; color-scheme:dark;}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+#home,#quiz,#result{width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
 .wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
@@ -134,11 +135,28 @@ section{display:flex;flex-direction:column;gap:14px}
 <div class="wrap">
   <header>
     <h1>日本史題庫</h1>
-    <p class="sub">115-1 日本史：1868 年以前　講義 9/15 – 11/3　選擇題＋填空題</p>
   </header>
 
   <!-- 首頁 -->
   <div id="home" class="wrap" style="gap:28px">
+    <section>
+      <div class="label">開始測驗</div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:18px">
+        <div id="resumeBox" class="row" hidden>
+          <button class="btn" id="resumeBtn">繼續上一輪</button>
+          <span class="note num" id="resumeInfo"></span>
+        </div>
+        <div class="opt"><div class="label">範圍</div><div class="chips" id="optChap"></div></div>
+        <div class="opt"><div class="label">題型</div><div class="chips" id="optType"></div></div>
+        <div class="opt"><div class="label">出題方式</div><div class="chips" id="optMode"></div></div>
+        <div class="opt"><div class="label">題數</div><div class="chips" id="optCount"></div></div>
+        <div class="row">
+          <button class="btn" id="startBtn">開始</button>
+          <span class="note num" id="poolInfo"></span>
+        </div>
+      </div>
+    </section>
+
     <section>
       <div class="label">我的進度</div>
       <div class="panel" style="display:flex;flex-direction:column;gap:16px">
@@ -156,24 +174,6 @@ section{display:flex;flex-direction:column;gap:14px}
     <section>
       <div class="label">各講進度</div>
       <div class="panel" id="chapters" style="padding-block:6px"></div>
-    </section>
-
-    <section>
-      <div class="label">開始測驗</div>
-      <div class="panel" style="display:flex;flex-direction:column;gap:18px">
-        <div id="resumeBox" class="row" hidden>
-          <button class="btn" id="resumeBtn">繼續上一輪</button>
-          <span class="note num" id="resumeInfo"></span>
-        </div>
-        <div class="opt"><div class="label">範圍</div><div class="chips" id="optChap"></div></div>
-        <div class="opt"><div class="label">題型</div><div class="chips" id="optType"></div></div>
-        <div class="opt"><div class="label">出題方式</div><div class="chips" id="optMode"></div></div>
-        <div class="opt"><div class="label">題數</div><div class="chips" id="optCount"></div></div>
-        <div class="row">
-          <button class="btn" id="startBtn">開始</button>
-          <span class="note num" id="poolInfo"></span>
-        </div>
-      </div>
     </section>
 
     <div class="row" id="resetRow">
@@ -200,7 +200,6 @@ section{display:flex;flex-direction:column;gap:14px}
       <div id="qFb" hidden></div>
       <div class="row" id="qNav" hidden>
         <button class="btn" id="nextBtn">下一題</button>
-        <span class="kbd">按 Enter 繼續</span>
       </div>
     </div>
     <div class="row"><button class="btn quiet" id="quitBtn">結束這一輪</button></div>
@@ -753,7 +752,7 @@ function renderQ(){
   if(q.t==='m'){
     if(!R.orders[q.id])R.orders[q.id]=shuffle(q.o.map((_,i)=>i));
     const ord=R.orders[q.id];
-    body.innerHTML=`<div class="choices">${ord.map((oi,k)=>`<button class="choice" type="button" data-oi="${oi}"><span class="k">${'ABCD'[k]}</span><span>${esc(q.o[oi])}</span></button>`).join('')}</div><p class="kbd" style="margin:10px 0 0">可按 1–4 或 A–D 作答</p>`;
+    body.innerHTML=`<div class="choices">${ord.map((oi,k)=>`<button class="choice" type="button" data-oi="${oi}"><span class="k">${'ABCD'[k]}</span><span>${esc(q.o[oi])}</span></button>`).join('')}</div>`;
     body.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answerM(+b.dataset.oi));
   } else {
     body.innerHTML=`<form class="fill" id="fillForm" autocomplete="off"><input id="fillIn" type="text" placeholder="輸入答案" aria-label="填空答案" enterkeyhint="done"><button class="btn" type="submit">送出</button></form>`;
@@ -828,7 +827,7 @@ renderHome();
 })();
 </script>
 
-<p class="note num" style="text-align:center;margin-top:32px">離線版 202611090043</p>
+<p class="note num" style="text-align:center;margin-top:32px">離線版 202611090101</p>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 // 離線快取：第一次打開時把整個 App 存在手機上，之後沒網路也能開
-const CACHE = "nihonshi-202611090043";
+const CACHE = "nihonshi-202611090101";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(FILES.map(f =>
