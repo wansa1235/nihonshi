@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="日本史題庫">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eef0ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13161c" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<style>
+.apptabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-top:10px}
+.apptabs a{padding:6px 0 8px;color:var(--muted);text-decoration:none;font-weight:500;font-size:15px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.apptabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+.apptabs a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<title>日本史年表</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：單欄年表，左欄年代、右欄事件；與題庫同一套藍墨配色 */
+:root{
+  --bg:#eef0ee; --surface:#fbfbfa; --ink:#1c2230; --muted:#5b6474; --line:#d6dad6;
+  --accent:#27467a; --accent-ink:#ffffff; --accent-soft:#e2e8f3; --mark:#9a3b2c;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13161c; --surface:#1b1f27; --ink:#e5e8ee; --muted:#9aa3b2; --line:#2d333e;
+  --accent:#8eaee6; --accent-ink:#10141b; --accent-soft:#232c3c; --mark:#ee9a86; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#13161c; --surface:#1b1f27; --ink:#e5e8ee; --muted:#9aa3b2; --line:#2d333e;
+  --accent:#8eaee6; --accent-ink:#10141b; --accent-soft:#232c3c; --mark:#ee9a86; color-scheme:dark;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 72px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{font-family:var(--serif);font-weight:700;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,6vw,38px);line-height:1.2;letter-spacing:.02em}
+h2{font-size:clamp(22px,5vw,27px);line-height:1.3}
+h3{font-size:16px}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.label{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:500}
+.muted{color:var(--muted)}
+/* 跳轉列 */
+.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.jump::-webkit-scrollbar{display:none}
+.jump a{display:inline-block;font-size:14px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;margin-right:6px;background:var(--surface)}
+.jump a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* 一覽表 */
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:15px}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+thead th{border-top:0;font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:500}
+td.k{color:var(--muted);white-space:nowrap}
+td.n{font-family:var(--serif);font-weight:700;white-space:nowrap}
+td.y{white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.later td{color:var(--muted)}
+tr.later td.n{font-weight:500}
+/* 時代段落 */
+.era{display:flex;flex-direction:column;gap:18px;scroll-margin-top:64px}
+.era-head{display:flex;flex-direction:column;gap:6px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.era-head .top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.era-head .span{font-size:15px;color:var(--accent);font-weight:500}
+.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 14px;margin:6px 0 0;font-size:15px}
+.facts dt{color:var(--muted);font-size:13px;letter-spacing:.08em;padding-top:2px}
+.facts dd{margin:0;min-width:0}
+/* 年表本體 */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:7.2em minmax(0,1fr);gap:0 16px;padding:12px 0;border-top:1px solid var(--line)}
+.tl li:first-child{border-top:0}
+.tl .y{font-family:var(--serif);font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent);line-height:1.6}
+.tl .ev{min-width:0;display:flex;flex-direction:column;gap:2px}
+.tl .ev b{font-weight:700}
+.tl .ev p{color:var(--muted);font-size:15px;padding-left:1em}
+.tl .ev em{font-style:normal;color:var(--mark);font-weight:500}
+/* 重點整理 */
+.keys{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.kp{display:grid;grid-template-columns:5.2em minmax(0,1fr);gap:8px 14px;margin:0;font-size:15px}
+.kp dt{font-weight:700;color:var(--accent)}
+.kp dd{margin:0;min-width:0}
+.later-note{font-size:14px}
+@media (max-width:520px){
+  table{min-width:0}
+  thead{display:none}
+  tbody{display:block}
+  tbody tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 10px;padding:10px 14px;border-top:1px solid var(--line)}
+  tbody tr:first-child{border-top:0}
+  tbody td{border:0;padding:0;min-width:0}
+  td.k{grid-row:1;grid-column:1;padding-top:2px;font-size:13px}
+  td.n{grid-row:1;grid-column:2}
+  td.y{grid-column:1/-1;color:var(--accent)}
+  tbody td:last-child{grid-column:1/-1;font-size:14px;color:var(--muted)}
+  tbody td:last-child:empty{display:none}
+  .tl li{grid-template-columns:1fr;gap:2px}
+  .kp{grid-template-columns:1fr;gap:0}
+  .kp dd{margin-bottom:8px}
+  .keys{padding:16px}
+}
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <h1>日本史年表</h1>
+    <p class="muted">依講義 9/15 – 11/3 整理：繩文時代到平安時代</p>
+    <nav class="apptabs" aria-label="切換頁面"><a href="./">題庫</a><a href="nenpyo.html" aria-current="page">年表</a></nav>
+  </header>
+
+  <nav class="jump" aria-label="跳到時代">
+    <a href="#overview">一覽</a><a href="#jomon">繩文</a><a href="#yayoi">彌生</a><a href="#kofun">古墳</a><a href="#asuka">飛鳥</a><a href="#nara">奈良</a><a href="#heian">平安</a><a href="#later">之後</a>
+  </nav>
+
+  <!-- 一覽 -->
+  <section id="overview" class="era" style="gap:12px">
+    <div class="label">時代一覽</div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>區分</th><th>時代</th><th>時間</th><th>政權・中心</th></tr></thead>
+        <tbody>
+          <tr><td class="k">原始</td><td class="n">繩文時代</td><td class="y">約 13,000 – 2,300 年前</td><td>無統一政權，小型定居聚落</td></tr>
+          <tr><td class="k">原始</td><td class="n">彌生時代</td><td class="y">約前 3 世紀 – 3 世紀</td><td>小國分立 → 邪馬台國聯盟（女王卑彌呼）</td></tr>
+          <tr><td class="k">古代</td><td class="n">古墳時代</td><td class="y">3 世紀中葉 – 7 世紀</td><td>大和政權（大王＋豪族聯盟），大和（奈良）</td></tr>
+          <tr><td class="k">古代</td><td class="n">飛鳥時代</td><td class="y">6 世紀末 – 710</td><td>大王（天皇）＋蘇我氏 → 大化改新後走向中央集權，飛鳥・藤原京</td></tr>
+          <tr><td class="k">古代</td><td class="n">奈良時代</td><td class="y">710 – 794</td><td>律令國家（天皇與貴族），平城京</td></tr>
+          <tr><td class="k">古代</td><td class="n">平安時代</td><td class="y">794 – 1192</td><td>律令 → 攝關政治（藤原氏）→ 院政 → 平氏政權，平安京</td></tr>
+          <tr class="later"><td class="k">中世</td><td class="n">鎌倉時代</td><td class="y">1192 – 1333</td><td>鎌倉幕府</td></tr>
+          <tr class="later"><td class="k">中世</td><td class="n">室町時代</td><td class="y">1333 – 1568</td><td>含南北朝、戰國時代（1467 –）</td></tr>
+          <tr class="later"><td class="k">近世</td><td class="n">安土桃山時代</td><td class="y">1568 – 1603</td><td></td></tr>
+          <tr class="later"><td class="k">近世</td><td class="n">江戶時代</td><td class="y">1603 – 1868</td><td>江戶幕府</td></tr>
+          <tr class="later"><td class="k">近代</td><td class="n">明治・大正・昭和</td><td class="y">1868 / 1912 / 1926</td><td>1945 年以後為現代</td></tr>
+          <tr class="later"><td class="k">現代</td><td class="n">平成・令和</td><td class="y">1989 / 2019</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted later-note">灰字是 9/15 課程說明時代表上的後續時代，講義目前講到平安時代。</p>
+  </section>
+
+  <!-- 繩文 -->
+  <section id="jomon" class="era">
+    <div class="era-head">
+      <div class="label">原始時代　講義①　9/22</div>
+      <div class="top"><h2>繩文時代</h2><span class="span num">約 13,000 年前 – 約 2,300 年前</span></div>
+      <dl class="facts"><dt>政權</dt><dd>沒有統一政權；定居聚落每處約 4～6 戶、20～30 人</dd><dt>代表遺址</dt><dd>三內丸山遺址（青森縣）</dd></dl>
+    </div>
+    <ol class="tl">
+      <li><div class="y">約 1 萬年前</div><div class="ev"><b>最後一次冰河期結束，日本列島形成</b><p>冰層融化、海平面上升，日本與大陸分離。</p></div></li>
+      <li><div class="y">繩文時代</div><div class="ev"><b>狩獵、捕魚、採集的定居生活</b><p>鹿、野豬、魚、貝類、堅果、山藥；可能已有稻、麥、粟的栽培（講義加問號）。</p></div></li>
+      <li><div class="y">繩文末期</div><div class="ev"><b>水稻農耕開始傳入九州北部</b><p>時間有西元前 4 世紀、西元前 10 世紀兩說。</p></div></li>
+    </ol>
+    <div class="keys"><h3>重點整理</h3>
+      <dl class="kp">
+        <dt>住居</dt><dd>豎穴式住宅；貝塚是丟棄食物殘渣的地方</dd>
+        <dt>交流</dt><dd>與鄰近聚落通婚，與遠方聚落交易黑曜石、翡翠</dd>
+        <dt>土器</dt><dd>繩文土器：表面有繩紋、黑褐色、器壁較厚</dd>
+        <dt>信仰</dt><dd>土偶、石棒用於驅邪與祈求豐收多產；Animism（萬物有靈）</dd>
+        <dt>習俗</dt><dd>拔牙（成年禮等人生儀禮）、屈肢葬</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 彌生 -->
+  <section id="yayoi" class="era">
+    <div class="era-head">
+      <div class="label">原始時代　講義①　9/22</div>
+      <div class="top"><h2>彌生時代</h2><span class="span num">約西元前 3 世紀 – 西元 3 世紀</span></div>
+      <dl class="facts"><dt>政權</dt><dd>小國分立 → 倭國大亂 → 以邪馬台國為中心約 30 國的聯盟（女王卑彌呼）</dd><dt>代表遺址</dt><dd>登呂遺址（靜岡縣）、吉野里遺址（佐賀縣）</dd></dl>
+    </div>
+    <ol class="tl">
+      <li><div class="y">彌生時代</div><div class="ev"><b>水稻農耕與青銅器、鐵器自中國、朝鮮半島傳入</b><p>由採集食物轉為生產食物；「國」誕生，出現統治者與階級，戰爭開始。</p></div></li>
+      <li><div class="y">漢代</div><div class="ev"><b>倭人分立一百多國，遣使樂浪郡</b><p>出處：《漢書》地理志。</p></div></li>
+      <li><div class="y num">57</div><div class="ev"><b>奴國受光武帝賜金印「漢委奴國王」</b><p>出處：《後漢書》東夷傳。金印於 <em>1784 年</em>（江戶時代）在福岡市志賀島出土。</p></div></li>
+      <li><div class="y num">107</div><div class="ev"><b>倭國王帥升向漢朝進獻生口 160 人</b><p>出處：《後漢書》東夷傳。</p></div></li>
+      <li><div class="y">其後</div><div class="ev"><b>倭國大亂 → 共立卑彌呼，成立邪馬台國聯盟</b><p>出處：《三國志》魏志倭人傳。卑彌呼「事鬼道，能惑眾」，無夫婿，由弟弟輔佐治國。</p></div></li>
+      <li><div class="y num">239</div><div class="ev"><b>卑彌呼向魏朝貢</b><p>獲賜金印「親魏倭王」與銅鏡一百面。</p></div></li>
+      <li><div class="y">卑彌呼死後</div><div class="ev"><b>男王即位，再度內亂 → 宗女壹與（臺與）即位，恢復穩定</b><p>卑彌呼死後「大作冢，徑百餘步」，徇葬奴婢百餘人。</p></div></li>
+      <li><div class="y num">266 –</div><div class="ev"><b>約 150 年間，倭國從中國史書中消失</b><p>直到 5 世紀《宋書》才記載倭五王。</p></div></li>
+    </ol>
+    <div class="keys"><h3>重點整理</h3>
+      <dl class="kp">
+        <dt>農耕</dt><dd>水稻最先在九州北部發展；鐵製農具逐漸普及；高床式倉庫儲存收穫，防潮防鼠</dd>
+        <dt>土器</dt><dd>彌生土器：1884 年於東京彌生町首次發現；紅褐色、器壁較薄；用於炊煮、儲藏、飲食、祭祀</dd>
+        <dt>青銅器</dt><dd>多為祭器：銅劍、銅矛、銅鐸、銅鏡</dd>
+        <dt>聚落與墓</dt><dd>大型聚落、環壕聚落（防禦）；甕棺墓、墳丘墓</dd>
+        <dt>邪馬台國在哪</dt><dd>近畿說：3 世紀近畿已有與大和政權相銜接的聯盟。九州說：九州北部的小國聯盟，與大和政權不同，因此要問是否曾東遷</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 古墳 -->
+  <section id="kofun" class="era">
+    <div class="era-head">
+      <div class="label">古代　講義②　9/29、10/6</div>
+      <div class="top"><h2>古墳時代</h2><span class="span num">3 世紀中葉 – 7 世紀</span></div>
+      <dl class="facts"><dt>政權</dt><dd>大和政權：約 3 世紀後半起，以大和（今奈良）為中心的豪族聯盟；領袖稱「大王」；豪族私有土地與人民</dd><dt>制度</dt><dd>氏姓制度：氏＝血緣集團名（蘇我、物部、大伴、葛城）；姓＝大王授予的稱號（臣、連、君、直）</dd></dl>
+    </div>
+    <ol class="tl">
+      <li><div class="y">3 世紀中葉</div><div class="ev"><b>大型古墳在日本西部出現</b><p>箸墓古墳（奈良縣櫻井市）是前期規模最大的古墳。</p></div></li>
+      <li><div class="y">3 世紀後半</div><div class="ev"><b>大和政權形成</b></div></li>
+      <li><div class="y">4 – 7 世紀</div><div class="ev"><b>渡來人移居日本</b><p>帶來須惠器、鐵器生產、金屬加工、養蠶、紡織、土木、寺院建築，以及漢字、儒教、佛教；擔任朝廷文書記錄。</p></div></li>
+      <li><div class="y">4 世紀末</div><div class="ev"><b>與百濟、伽耶結盟，對抗高句麗、新羅</b><p>出處：好太王碑。與伽耶（任那）關係密切是為了取得鐵資源。</p></div></li>
+      <li><div class="y num">413 – 478</div><div class="ev"><b>倭五王（讚、珍、濟、興、武）向南朝宋朝貢</b><p>出處：《宋書》倭國傳。要求承認在朝鮮半島南部的軍事統治權。</p></div></li>
+      <li><div class="y">5 世紀後半</div><div class="ev"><b>大和政權勢力北至東北南部、南至九州</b><p>稻荷山古墳（埼玉）與江田船山古墳（熊本）出土刀劍，刻「獲加多支鹵大王」＝倭王武＝雄略天皇？</p></div></li>
+      <li><div class="y num">513?</div><div class="ev"><b>儒教傳入</b></div></li>
+      <li><div class="y num">538 / 552</div><div class="ev"><b>佛教自百濟傳入</b><p>兩說並列。</p></div></li>
+    </ol>
+    <div class="keys"><h3>重點整理</h3>
+      <dl class="kp">
+        <dt>古墳</dt><dd>圓墳、方墳、前方後圓墳（代表形式）、前方後方墳；最大的是大仙古墳（仁德天皇陵古墳，大阪府堺市）</dd>
+        <dt>構造</dt><dd>豎穴式石室；副葬品有銅鏡、鐵製武器、馬具、農具；埴輪排列在古墳上（圓筒、房屋、船、人物、動物）</dd>
+        <dt>祭祀</dt><dd>祈年祭（祈求豐收）、新嘗祭（感謝收穫）；自然神與祖先神崇拜是神社與神道的原型</dd>
+        <dt>巫術</dt><dd>太占法（燒鹿骨占卜）、盟神探湯（熱水神明裁判）</dd>
+        <dt>東亞局勢</dt><dd>中國：五胡十六國、南北朝。朝鮮半島：高句麗、新羅、百濟、伽耶</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 飛鳥 -->
+  <section id="asuka" class="era">
+    <div class="era-head">
+      <div class="label">古代　講義②　10/6</div>
+      <div class="top"><h2>飛鳥時代</h2><span class="span num">6 世紀末 – 710</span></div>
+      <dl class="facts"><dt>政權</dt><dd>推古天皇、聖德太子、蘇我馬子共同執政 → 645 年後走向以天皇為中心的中央集權（律令國家）</dd><dt>都城</dt><dd>飛鳥（奈良盆地南部）→ 藤原京（持統天皇）</dd></dl>
+    </div>
+    <ol class="tl">
+      <li><div class="y num">589</div><div class="ev"><b>隋統一中國，遠征高句麗</b></div></li>
+      <li><div class="y">6 世紀末</div><div class="ev"><b>蘇我馬子消滅物部守屋，掌握政權</b><p>蘇我氏積極接受佛教、與渡來人合作；物部氏與之對立。</p></div></li>
+      <li><div class="y num">596</div><div class="ev"><b>蘇我馬子創建飛鳥寺</b></div></li>
+      <li><div class="y">聖德太子執政</div><div class="ev"><b>冠位十二階、十七條憲法</b><p>聖德太子（577–622，廄戶皇子）是推古天皇的外甥。冠位十二階依才能功績授官；十七條憲法「以和為貴」，效忠大王、尊崇佛教。</p></div></li>
+      <li><div class="y num">607</div><div class="ev"><b>遣隋使小野妹子；聖德太子創建法隆寺</b><p>法隆寺是現存世界最古老的木造建築。</p></div></li>
+      <li><div class="y">7 世紀前半</div><div class="ev"><b>蘇我入鹿消滅山背大兄王（聖德太子之子），獨占政權</b></div></li>
+      <li><div class="y num">645</div><div class="ev"><b>乙巳之變 → 大化改新</b><p>中大兄皇子與中臣鎌足刺殺蘇我入鹿。定第一個年號「大化」；提出「公地公民」，國家直接統治人民。</p></div></li>
+      <li><div class="y num">663</div><div class="ev"><b>白村江之戰</b><p>援助百濟復國，被唐、新羅聯軍擊敗；之後加強九州防禦。</p></div></li>
+      <li><div class="y">天智天皇</div><div class="ev"><b>中大兄皇子即位，編製全國戶籍「庚午年籍」</b></div></li>
+      <li><div class="y num">672</div><div class="ev"><b>壬申之亂 → 天武天皇即位</b><p>大海人皇子（天智之弟）獲勝。建立中央集權律令國家、廢除豪族私有人民；八色之姓（真人、朝臣、宿禰…）；鑄富本錢；編纂律令與國史；興建藤原京。</p></div></li>
+      <li><div class="y num">676</div><div class="ev"><b>新羅統一朝鮮半島</b></div></li>
+      <li><div class="y">持統天皇</div><div class="ev"><b>飛鳥淨御原令、庚寅年籍、遷都藤原京</b><p>持統是天武的皇后。藤原京是大規模首都，採條坊制（棋盤式街道）。</p></div></li>
+      <li><div class="y">天武・持統期</div><div class="ev"><b>「天皇」稱號與國號「日本」出現？</b><p>講義以問號標示，確切時間仍有討論。</p></div></li>
+    </ol>
+    <div class="keys"><h3>重點整理</h3>
+      <dl class="kp">
+        <dt>飛鳥文化</dt><dd>日本最早的佛教文化，靠渡來人技術；受百濟、高句麗、中國、印度、西亞、希臘影響</dd>
+        <dt>遣隋使</dt><dd>外交，學習中國制度、思想與文化，派遣留學生、留學僧</dd>
+        <dt>改革脈絡</dt><dd>唐攻高句麗帶來壓力 → 需要國內統一與中央集權 → 大化改新 → 白村江戰敗 → 天智、天武、持統建立律令國家</dd>
+        <dt>戶籍</dt><dd>庚午年籍＝天智；庚寅年籍＝持統</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 奈良 -->
+  <section id="nara" class="era">
+    <div class="era-head">
+      <div class="label">古代　講義③　10/13、10/20</div>
+      <div class="top"><h2>奈良時代</h2><span class="span num">710 – 794</span></div>
+      <dl class="facts"><dt>政權</dt><dd>律令國家：以天皇與貴族為中心的中央集權體制</dd><dt>都城</dt><dd>平城京（奈良盆地北部），仿唐長安城，條坊制，人口約 10 萬</dd></dl>
+    </div>
+    <ol class="tl">
+      <li><div class="y num">630 – 894</div><div class="ev"><b>遣唐使</b><p>約每 20 年一次，最多約 500 人分乘 4 艘船；成員有大使、留學生、留學僧。</p></div></li>
+      <li><div class="y num">701</div><div class="ev"><b>大寶律令</b><p>參考唐朝律令；律＝刑法，令＝行政法。</p></div></li>
+      <li><div class="y num">710</div><div class="ev"><b>由藤原京遷都平城京</b><p>東市、西市交易各地特產，流通貨幣「和同開珎」。</p></div></li>
+      <li><div class="y num">712</div><div class="ev"><b>《古事記》</b><p>從神話到推古天皇：創世神話、國土創生、天孫降臨、神武東征、日本武尊。</p></div></li>
+      <li><div class="y num">713</div><div class="ev"><b>《風土記》</b><p>記錄各地物產、地名由來、地方傳說的地理志。</p></div></li>
+      <li><div class="y num">720</div><div class="ev"><b>《日本書紀》</b><p>漢文、編年體，從神代到持統天皇；之後陸續編纂《續日本紀》等官方史書。</p></div></li>
+      <li><div class="y num">722</div><div class="ev"><b>百萬町步開墾計畫</b><p>人口增加 → 口分田不足 → 鼓勵開墾。</p></div></li>
+      <li><div class="y num">723</div><div class="ev"><b>三世一身法</b><p>開墾地可由本人及後代三世持有。</p></div></li>
+      <li><div class="y num">741</div><div class="ev"><b>聖武天皇下令各國建國分寺、國分尼寺</b><p>鎮護國家思想。</p></div></li>
+      <li><div class="y num">743</div><div class="ev"><b>墾田永年私財法</b><p>開墾地永久私有 → 貴族、寺院、豪族擴大私有地，形成初期莊園 → <em>公地公民原則崩潰</em>。</p></div></li>
+      <li><div class="y num">751</div><div class="ev"><b>《懷風藻》</b><p>現存最早的漢詩集。</p></div></li>
+      <li><div class="y num">752</div><div class="ev"><b>東大寺大佛完成，開眼供養約 1 萬人參加</b></div></li>
+      <li><div class="y">奈良時代</div><div class="ev"><b>鑑真渡日、行基傳教、正倉院、《萬葉集》</b><p>鑑真五次失敗、失明後抵達，傳戒律，創唐招提寺。行基向民眾傳教，救貧、建橋、修水道。正倉院收聖武天皇遺物，被稱「絲路東方的終點」。《萬葉集》約 4,500 首和歌，用萬葉假名。</p></div></li>
+    </ol>
+    <div class="keys"><h3>重點整理</h3>
+      <dl class="kp">
+        <dt>中央</dt><dd>二官八省：神祇官（祭祀）、太政官（行政：太政大臣、左右大臣、大納言）；八省＝中務、式部、治部、民部、兵部、刑部、大藏、宮內</dd>
+        <dt>地方</dt><dd>國（國司，中央貴族）、郡（郡司，地方豪族）、里；五畿七道；大宰府（福岡，九州行政防衛外交）、多賀城（宮城，對抗蝦夷）</dd>
+        <dt>土地</dt><dd>班田收授法：每六年編戶籍，六歲以上男女授口分田</dd>
+        <dt>負擔</dt><dd>租（稻米約 3–10%）、調（絲綢布匹特產）、庸（京城勞役 10 天或繳布）、雜徭（每年約 50 天）、運腳；兵役：衛士（宮城警備 1 年）、防人（九州北部 3 年），武器糧食自備</dd>
+        <dt>天平文化</dt><dd>聖武天皇年號「天平」；佛教與唐文化，國際性</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 平安 -->
+  <section id="heian" class="era">
+    <div class="era-head">
+      <div class="label">古代　講義④　10/27、11/3</div>
+      <div class="top"><h2>平安時代</h2><span class="span num">794 – 1192</span></div>
+      <dl class="facts"><dt>政權</dt><dd>初期：天皇與律令（逐漸形骸化）→ 中期：攝關政治（藤原氏）→ 後期：院政（上皇）→ 平氏政權（第一個武士政權）</dd><dt>都城</dt><dd>平安京（京都）</dd></dl>
+    </div>
+    <ol class="tl">
+      <li><div class="y num">794</div><div class="ev"><b>桓武天皇遷都平安京</b></div></li>
+      <li><div class="y">初期</div><div class="ev"><b>律令體制形骸化；向東北擴張</b><p>戶籍造假、農民逃亡 → 班田收授法廢止、兵役縮減。征夷大將軍坂上田村麻呂征伐蝦夷。</p></div></li>
+      <li><div class="y">9 世紀初</div><div class="ev"><b>最澄開天台宗、空海開真言宗</b><p>最澄：比叡山延曆寺。空海：高野山金剛峯寺。批判奈良佛教與都市、政治結合，轉向山林修行與學問，重視密教。</p></div></li>
+      <li><div class="y">9 世紀</div><div class="ev"><b>平假名、片假名誕生</b><p>由萬葉假名發展而來。</p></div></li>
+      <li><div class="y num">894</div><div class="ev"><b>停止遣唐使（菅原道真提議）</b><p>原因：唐朝衰退、航海危險、民間貿易增加。</p></div></li>
+      <li><div class="y">中期</div><div class="ev"><b>攝關政治</b><p>藤原氏成為天皇外戚，壟斷攝政、關白，掌握國司任命權與廣大莊園；鼎盛期為藤原道長、藤原賴通。</p></div></li>
+      <li><div class="y">10 世紀中葉</div><div class="ev"><b>平將門（北關東）、藤原純友（瀨戶內海）叛亂，遭到鎮壓</b></div></li>
+      <li><div class="y">10 世紀中葉 –</div><div class="ev"><b>末法思想與淨土信仰</b><p>社會不安、治安惡化、災害、疫病。念「南無阿彌陀佛」求往生極樂；平等院鳳凰堂（京都宇治，藤原賴通建）。</p></div></li>
+      <li><div class="y">11 – 12 世紀</div><div class="ev"><b>武士團成長</b><p>源氏在東日本、平氏在西日本、奧州藤原氏在東北（平泉，中尊寺金色堂）。</p></div></li>
+      <li><div class="y">後期</div><div class="ev"><b>院政</b><p>上皇退位後在院廳掌握朝政：白河、鳥羽、後白河上皇。藤原氏權力相對下降，武士地位上升。</p></div></li>
+      <li><div class="y">保元之亂</div><div class="ev"><b>上皇 vs. 天皇</b><p>平清盛、源義朝都很活躍。</p></div></li>
+      <li><div class="y">平治之亂</div><div class="ev"><b>平清盛打敗源義朝</b><p>平清盛任太政大臣，建立日本第一個武士政權，推動日宋貿易。「非平氏者，不得為人」。</p></div></li>
+      <li><div class="y">源平之戰</div><div class="ev"><b>源義仲、源賴朝起兵；源義經（賴朝之弟）活躍</b><p>平氏的傲慢引起地方武士不滿。</p></div></li>
+      <li><div class="y num">1185</div><div class="ev"><b>壇之浦之戰（山口縣），平氏滅亡</b></div></li>
+      <li><div class="y num">1192</div><div class="ev"><b>鎌倉幕府成立，平安時代結束</b></div></li>
+    </ol>
+    <div class="keys"><h3>重點整理</h3>
+      <dl class="kp">
+        <dt>國風文化</dt><dd>以貴族為中心，符合日本風土與情感：《古今和歌集》（紀貫之等，敕選和歌集）、《土佐日記》（紀貫之）、《源氏物語》（紫式部，長篇故事）、《枕草子》（清少納言，隨筆）</dd>
+        <dt>武士</dt><dd>專門從事武藝、軍事的技術人員，以血緣與主從關係結合；起源為地方豪族、有力農民、京都武官</dd>
+        <dt>武士崛起</dt><dd>擔任警備與官職 → 開發土地並捐獻給皇族、貴族、寺社 → 徵收年貢、維持治安 → 掌握地方社會</dd>
+        <dt>政治演變</dt><dd>律令形骸化 → 攝關政治 → 院政 → 保元、平治之亂 → 平氏政權 → 源平之戰 → 鎌倉幕府</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 之後 -->
+  <section id="later" class="era">
+    <div class="era-head">
+      <div class="label">課程說明 9/15 時代表</div>
+      <div class="top"><h2>平安之後</h2><span class="span num">1192 – 1868</span></div>
+    </div>
+    <ol class="tl">
+      <li><div class="y num">1192</div><div class="ev"><b>鎌倉時代（中世）</b></div></li>
+      <li><div class="y num">1333</div><div class="ev"><b>室町時代（中世），含南北朝</b></div></li>
+      <li><div class="y num">1467</div><div class="ev"><b>戰國時代</b></div></li>
+      <li><div class="y num">1568</div><div class="ev"><b>安土桃山時代（近世）</b></div></li>
+      <li><div class="y num">1603</div><div class="ev"><b>江戶時代（近世）</b></div></li>
+      <li><div class="y num">1868</div><div class="ev"><b>明治時代（近代），本課程範圍到此</b></div></li>
+    </ol>
+  </section>
+</div>
+
+<p class="note num" style="text-align:center;margin-top:32px">離線版 202611090117</p>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+</body>
+</html>

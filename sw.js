@@ -1,6 +1,6 @@
 // 離線快取：第一次打開時把整個 App 存在手機上，之後沒網路也能開
-const CACHE = "nihonshi-202611090101";
-const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
+const CACHE = "nihonshi-202611090117";
+const FILES = ["./", "index.html", "nenpyo.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(FILES.map(f =>
     fetch(new Request(f, { cache: "reload" })).then(r => { if (r.ok) return c.put(f, r); })))).then(() => self.skipWaiting()));
@@ -16,12 +16,13 @@ self.addEventListener("fetch", e => {
   if (url.origin !== location.origin && !font) return;
   // 頁面本身：有網路就抓最新版（最多等 3 秒），沒網路就用手機上的版本
   if (req.mode === "navigate" || url.pathname.endsWith(".html") || url.pathname.endsWith("/")) {
+    const key = url.pathname.endsWith("nenpyo.html") ? "nenpyo.html" : "index.html";
     e.respondWith(caches.open(CACHE).then(async c => {
       try {
         const r = await Promise.race([fetch(req, { cache: "no-cache" }), new Promise((_, no) => setTimeout(no, 3000))]);
-        if (r.ok) { c.put("index.html", r.clone()); return r; }
+        if (r.ok) { c.put(key, r.clone()); return r; }
       } catch {}
-      return (await c.match("index.html")) || (await c.match("./")) || Response.error();
+      return (await c.match(key)) || (await c.match("index.html")) || Response.error();
     }));
     return;
   }
